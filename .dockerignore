@@ -1,0 +1,28 @@
+# Dev Docker configs (keep docker/production/)
+docker/php-fpm/
+docker/nginx/
+docker/mysql/
+docker/baikal/
+docker/openldap/
+
+# Dev tools
+docker-compose.yml
+tests/
+node_modules/
+phpunit.xml
+babel.config.json
+
+# VCS and docs
+.git/
+.gitignore
+docs/
+*.md
+
+# Runtime data (recreated in container)
+storage/logs/*
+storage/sessions/*
+storage/cache/*
+
+# IDE
+.idea/
+.DS_Store
