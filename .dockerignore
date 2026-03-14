@@ -10,7 +10,6 @@ docker-compose.yml
 tests/
 node_modules/
 phpunit.xml
-babel.config.json
 
 # VCS and docs
 .git/
