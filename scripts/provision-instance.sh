@@ -20,8 +20,15 @@ MYSQL_ROOT_PASS="${3:-secret}"
 SANITIZED=$(echo "$PRODUCT_NAME" | tr -cd 'a-zA-Z0-9-' | tr '-' '_')
 DB_NAME="ea_${SANITIZED}"
 DB_USER="ea_${SANITIZED}"
+# Password uses base64 with /+= stripped — intentionally restricted to [a-zA-Z0-9]
+# to prevent SQL injection via heredoc interpolation below
 DB_PASS=$(openssl rand -base64 24 | tr -d '/+=' | head -c 24)
 ENCRYPTION_KEY=$(openssl rand -base64 32)
+
+if [ -z "$SANITIZED" ]; then
+    echo "ERROR: Product name contains no valid characters after sanitization" >&2
+    exit 1
+fi
 
 echo "=== EasyAppointments Instance Provisioner ==="
 echo ""

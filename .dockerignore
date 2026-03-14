@@ -22,6 +22,10 @@ storage/logs/*
 storage/sessions/*
 storage/cache/*
 
+# Env files (may contain secrets)
+.env
+.env.*
+
 # IDE
 .idea/
 .DS_Store

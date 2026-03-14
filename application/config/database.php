@@ -49,14 +49,14 @@
 $active_group = 'default';
 $query_builder = TRUE;
 
-$db['default']['hostname'] = getenv('EA_DB_HOST') ?: Config::DB_HOST;
-$db['default']['username'] = getenv('EA_DB_USERNAME') ?: Config::DB_USERNAME;
-$db['default']['password'] = getenv('EA_DB_PASSWORD') ?: Config::DB_PASSWORD;
-$db['default']['database'] = getenv('EA_DB_NAME') ?: Config::DB_NAME;
+$db['default']['hostname'] = (($v = getenv('EA_DB_HOST')) !== false) ? $v : Config::DB_HOST;
+$db['default']['username'] = (($v = getenv('EA_DB_USERNAME')) !== false) ? $v : Config::DB_USERNAME;
+$db['default']['password'] = (($v = getenv('EA_DB_PASSWORD')) !== false) ? $v : Config::DB_PASSWORD;
+$db['default']['database'] = (($v = getenv('EA_DB_NAME')) !== false) ? $v : Config::DB_NAME;
 $db['default']['dbdriver'] = 'mysqli';
 $db['default']['dbprefix'] = 'ea_';
 $db['default']['pconnect'] = FALSE;
-$db['default']['db_debug'] = TRUE;
+$db['default']['db_debug'] = filter_var(getenv('EA_DEBUG_MODE') ?: Config::DEBUG_MODE, FILTER_VALIDATE_BOOLEAN);
 $db['default']['cache_on'] = FALSE;
 $db['default']['cachedir'] = '';
 $db['default']['char_set'] = 'utf8mb4';

@@ -92,7 +92,8 @@ if (!empty($allowed_origins_raw)) {
     $allowed_origins = array_filter(array_map('trim', explode(',', $allowed_origins_raw)));
 
     if (in_array($origin, $allowed_origins, true)) {
-        header('Access-Control-Allow-Origin: ' . $origin);
+        $safe_origin = str_replace(["\r", "\n"], '', $origin);
+        header('Access-Control-Allow-Origin: ' . $safe_origin);
         header('Access-Control-Allow-Credentials: true');
     }
 } else {
@@ -110,7 +111,7 @@ if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
 }
 
 // CSP frame-ancestors for iframe embedding control
-$frame_ancestors = getenv('EA_FRAME_ANCESTORS') ?: '*';
+$frame_ancestors = preg_replace('/[\r\n]/', '', getenv('EA_FRAME_ANCESTORS') ?: '*');
 
 if ($frame_ancestors !== '*') {
     header("Content-Security-Policy: frame-ancestors 'self' " . $frame_ancestors);
