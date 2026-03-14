@@ -133,11 +133,13 @@ $config['language_codes'] = $languages;
 
 $language_code = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
 
+$ea_language = getenv('EA_LANGUAGE');
+
 $config['language'] =
     $_GET['language'] ??
-    (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'], $languages[$language_code])
+    ($ea_language ?: (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'], $languages[$language_code])
         ? $languages[$language_code]
-        : Config::LANGUAGE);
+        : Config::LANGUAGE));
 
 $config['language_code'] = array_search($config['language'], $languages) ?: 'en';
 
@@ -345,7 +347,7 @@ $config['cache_path'] = __DIR__ . '/../../storage/cache/';
 | MUST set an encryption key.  See the user guide for info.
 |
 */
-$config['encryption_key'] = base64_encode(APPPATH);
+$config['encryption_key'] = getenv('EA_ENCRYPTION_KEY') ?: base64_encode(APPPATH);
 
 /*
 |--------------------------------------------------------------------------
@@ -462,7 +464,7 @@ $config['rewrite_short_tags'] = FALSE;
 | Comma-delimited, e.g. '10.0.1.200,10.0.1.201'
 |
 */
-$config['proxy_ips'] = '';
+$config['proxy_ips'] = getenv('EA_PROXY_IPS') ?: '';
 
 /*
 |--------------------------------------------------------------------------

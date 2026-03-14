@@ -11,8 +11,11 @@
 
 $config['version'] = '1.5.2'; // This must be changed manually.
 
-$config['url'] = Config::BASE_URL;
+$config['url'] = getenv('EA_BASE_URL') ?: Config::BASE_URL;
 
-$config['debug'] = Config::DEBUG_MODE;
+$config['debug'] = filter_var(
+    getenv('EA_DEBUG_MODE') ?: Config::DEBUG_MODE,
+    FILTER_VALIDATE_BOOLEAN,
+);
 
 $config['cache_busting_token'] = 'TSJ79';

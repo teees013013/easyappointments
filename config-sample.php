@@ -29,6 +29,9 @@ class Config
     // ------------------------------------------------------------------------
     // GENERAL SETTINGS
     // ------------------------------------------------------------------------
+    // These are compile-time defaults only.
+    // Environment variables override these at the point of use:
+    //   EA_BASE_URL, EA_LANGUAGE, EA_DEBUG_MODE
 
     const BASE_URL = 'http://localhost';
     const LANGUAGE = 'english';
@@ -37,6 +40,7 @@ class Config
     // ------------------------------------------------------------------------
     // DATABASE SETTINGS
     // ------------------------------------------------------------------------
+    // Override with: EA_DB_HOST, EA_DB_NAME, EA_DB_USERNAME, EA_DB_PASSWORD
 
     const DB_HOST = 'mysql';
     const DB_NAME = 'easyappointments';
@@ -46,6 +50,7 @@ class Config
     // ------------------------------------------------------------------------
     // GOOGLE CALENDAR SYNC
     // ------------------------------------------------------------------------
+    // Override with: EA_GOOGLE_SYNC, EA_GOOGLE_CLIENT_ID, EA_GOOGLE_CLIENT_SECRET
 
     const GOOGLE_SYNC_FEATURE = false; // Enter TRUE or FALSE
     const GOOGLE_CLIENT_ID = '';

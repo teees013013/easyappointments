@@ -91,7 +91,7 @@ class Ldap_client
                 'user_email' => $user['email'],
                 'username' => $username,
                 'timezone' => !empty($user['timezone']) ? $user['timezone'] : $default_timezone,
-                'language' => !empty($user['language']) ? $user['language'] : Config::LANGUAGE,
+                'language' => !empty($user['language']) ? $user['language'] : (getenv('EA_LANGUAGE') ?: Config::LANGUAGE),
                 'role_slug' => $role['slug'],
             ];
         }

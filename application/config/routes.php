@@ -85,23 +85,38 @@ $route['translate_uri_dashes'] = FALSE;
 |
 */
 
-header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*')); // NOTICE: Change this header to restrict CORS access.
+$allowed_origins_raw = getenv('EA_CORS_ORIGINS') ?: '';
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-header('Access-Control-Allow-Credentials: "true"');
+if (!empty($allowed_origins_raw)) {
+    $allowed_origins = array_filter(array_map('trim', explode(',', $allowed_origins_raw)));
 
-if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-{
-    // May also be using PUT, PATCH, HEAD etc
+    if (in_array($origin, $allowed_origins, true)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Access-Control-Allow-Credentials: true');
+    }
+} else {
+    // No CORS origins configured — allow all (dev/backwards compat)
+    header('Access-Control-Allow-Origin: *');
+    // Note: Do NOT set Allow-Credentials with wildcard origin (browsers reject this)
+}
+
+if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) {
     header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD');
 }
 
-if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-{
-    header('Access-Control-Allow-Headers: ' . $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']);
+if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 }
 
-if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS')
-{
+// CSP frame-ancestors for iframe embedding control
+$frame_ancestors = getenv('EA_FRAME_ANCESTORS') ?: '*';
+
+if ($frame_ancestors !== '*') {
+    header("Content-Security-Policy: frame-ancestors 'self' " . $frame_ancestors);
+}
+
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 

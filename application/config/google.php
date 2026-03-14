@@ -10,8 +10,11 @@
 |
 */
 
-$config['google_sync_feature'] = Config::GOOGLE_SYNC_FEATURE;
+$config['google_sync_feature'] = filter_var(
+    getenv('EA_GOOGLE_SYNC') ?: Config::GOOGLE_SYNC_FEATURE,
+    FILTER_VALIDATE_BOOLEAN,
+);
 
-$config['google_client_id'] = Config::GOOGLE_CLIENT_ID;
+$config['google_client_id'] = getenv('EA_GOOGLE_CLIENT_ID') ?: Config::GOOGLE_CLIENT_ID;
 
-$config['google_client_secret'] = Config::GOOGLE_CLIENT_SECRET;
+$config['google_client_secret'] = getenv('EA_GOOGLE_CLIENT_SECRET') ?: Config::GOOGLE_CLIENT_SECRET;

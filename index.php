@@ -106,11 +106,12 @@ if (str_contains($_SERVER['REQUEST_URI'] ?? '', '.min.js.map')) {
  */
 
 $app_env = getenv('APP_ENV');
+$debug_mode = filter_var(getenv('EA_DEBUG_MODE') ?: Config::DEBUG_MODE, FILTER_VALIDATE_BOOLEAN);
 
 if ($app_env) {
     define('ENVIRONMENT', $app_env);
 } else {
-    define('ENVIRONMENT', Config::DEBUG_MODE ? 'development' : 'production');
+    define('ENVIRONMENT', $debug_mode ? 'development' : 'production');
 }
 
 /*
