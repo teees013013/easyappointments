@@ -1,4 +1,5 @@
 /*.zip
+/scripts/.env
 /.idea/
 /.tmp-package/
 /build/

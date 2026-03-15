@@ -270,53 +270,53 @@ This is simpler but means you need to SSH into the server and rebuild for each u
 
 All EasyAppointments instances share a single MySQL server, each with its own database and dedicated user.
 
-### Step 1: Create MySQL Service in Coolify
+### Option A: Aiven Managed MySQL (Recommended)
+
+If you are using Aiven (recommended for reliability), skip Steps 1–3 — your MySQL server is already running in Aiven's cloud. Skip directly to **Step 4**.
+
+Your Aiven connection details are on the **Service Overview** page:
+
+| Detail | Where to find it |
+|--------|-----------------|
+| Host | **Host** field |
+| Port | **Port** field (typically `12476` or similar) |
+| Admin user | **User** field (typically `avnadmin`) |
+| Admin password | **Password** field |
+
+### Option B: Coolify-Managed MySQL (Self-Hosted)
 
 1. In Coolify, go to **Projects** > **Default** (or create a new project called "Booking Infrastructure")
 2. Click **+ New** > **Database** > **MySQL**
 3. Configure:
    - **Name:** `booking-mysql`
    - **Version:** MySQL 8.0 (or 8.4)
-   - **Root Password:** Generate a strong password and **save it securely** (you'll need this for the provisioning script)
+   - **Root Password:** Generate a strong password and **save it securely**
    - **Default Database:** `mysql` (leave default)
    - **Network:** Keep on Coolify's internal network
-   - **Persistent Storage:** Enabled (this is the default — your data survives container restarts)
+   - **Persistent Storage:** Enabled (your data survives container restarts)
 4. Click **Deploy**
+5. Note the **internal hostname** from the service's **General** tab (e.g. `booking-mysql`)
 
-### Step 2: Note the Internal Hostname
-
-After deployment, go to the MySQL service details. Note the **internal hostname** — this is what your EA containers use to connect. In Coolify, this is typically the service UUID or a name like `booking-mysql`.
-
-You can find it under the service's **General** tab. It will look something like:
-
-```
-booking-mysql
-```
-
-Or you can use the Coolify internal DNS format. The exact hostname depends on your Coolify version, but it's visible in the service configuration.
-
-### Step 3: Test the Connection
-
-From the Coolify terminal (or by exec-ing into the MySQL container):
-
-```bash
-docker exec -it <mysql-container-id> mysql -u root -p
-```
-
-Enter the root password. If you get a MySQL prompt, the database server is running.
+For local Coolify MySQL, use:
+- Host: `booking-mysql` (internal Docker network name)
+- Port: `3306`
+- Admin user: `root`
 
 ### Step 4: Provision Your First Instance Database
 
-You can either run the provisioning script from your local machine (if MySQL is accessible) or from the server.
+Run the provisioning script from your local machine or from the Coolify VPS.
 
-**From the server (recommended):**
+**Aiven:**
 
 ```bash
-# Clone your repo on the server (if not already done)
-cd /path/to/easyappointments
+./scripts/provision-instance.sh product-a \
+    YOUR_AIVEN_HOST AVNS_YOUR_PASSWORD 12476 avnadmin
+```
 
-# Run the provisioning script
-./scripts/provision-instance.sh product-a booking-mysql YOUR_MYSQL_ROOT_PASSWORD
+**Coolify-managed MySQL:**
+
+```bash
+./scripts/provision-instance.sh product-a booking-mysql YOUR_ROOT_PASSWORD
 ```
 
 **Output will look like:**
@@ -327,6 +327,7 @@ cd /path/to/easyappointments
 Product:  product-a
 Database: ea_product_a
 DB User:  ea_product_a
+DB Host:  your-host.aivencloud.com:12476
 
 === Database created successfully ===
 
@@ -334,7 +335,9 @@ DB User:  ea_product_a
 Copy these into your Coolify service configuration:
 
 EA_BASE_URL=https://product-a.bookings.yourdomain.com
-EA_DB_HOST=booking-mysql
+EA_DB_HOST=your-host.aivencloud.com
+EA_DB_PORT=12476
+EA_DB_SSL=true
 EA_DB_NAME=ea_product_a
 EA_DB_USERNAME=ea_product_a
 EA_DB_PASSWORD=aBcDeFgHiJkLmNoPqRsT
@@ -345,6 +348,32 @@ EA_PROXY_IPS=172.16.0.0/12
 ```
 
 **Save this output** — you'll paste it into Coolify when deploying the instance.
+
+### Step 5: Set Up Hourly Backups
+
+Run the backup cron installer **once** on your Coolify VPS. It writes credentials to `/etc/ea-backup.env` (root-only) and installs an hourly cron job.
+
+```bash
+# SSH into your Coolify VPS
+ssh root@YOUR_SERVER_IP
+
+# Clone the repo on the server (if not already done)
+git clone https://github.com/YOUR_USERNAME/easyappointments.git /opt/easyappointments
+cd /opt/easyappointments
+
+# Install the backup cron (interactive — will prompt for MySQL credentials)
+sudo ./scripts/setup-backup-cron.sh
+```
+
+Backups are stored at `/opt/backups/ea-mysql/<db-name>/`:
+- `hourly/` — last 24 hourly dumps per database
+- `weekly/` — last 8 weekly snapshots (promoted each Sunday at midnight)
+
+To check backup status at any time:
+
+```bash
+tail -50 /var/log/ea-backup.log
+```
 
 ---
 
@@ -987,7 +1016,9 @@ docker image prune -a --filter "until=720h"  # Remove images older than 30 days
 | Variable | Required | Example |
 |----------|----------|---------|
 | `EA_BASE_URL` | Yes | `https://product-a.bookings.yourdomain.com` |
-| `EA_DB_HOST` | Yes | `booking-mysql` |
+| `EA_DB_HOST` | Yes | `your-host.aivencloud.com` or `booking-mysql` |
+| `EA_DB_PORT` | Yes | `12476` (Aiven) or `3306` (local) |
+| `EA_DB_SSL` | Yes | `true` (Aiven) or `false` (local) |
 | `EA_DB_NAME` | Yes | `ea_product_a` |
 | `EA_DB_USERNAME` | Yes | `ea_product_a` |
 | `EA_DB_PASSWORD` | Yes | (from provisioning script) |
