@@ -32,3 +32,12 @@
 /vendor/
 /metafile
 .DS_Store
+
+# Google service account keys (never commit credentials)
+*-pwa.json
+*serviceaccount*
+*service-account*
+*credentials*.json
+*client_secret*.json
+
+Padlockd Demo PWA.json
